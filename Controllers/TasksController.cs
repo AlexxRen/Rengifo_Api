@@ -1,6 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using LaunchDarkly.Sdk;
+using LaunchDarkly.Sdk.Server;
+using Microsoft.AspNetCore.Mvc;
+using LaunchDarkly.Sdk.Server.Interfaces;
 using Rengifo_Api.Models;
 using Rengifo_Api.Repositories;
+
+
+
 namespace Rengifo_Api.Controllers
 {
     [ApiController]
@@ -8,10 +14,14 @@ namespace Rengifo_Api.Controllers
     public class TasksController : ControllerBase
     {
         private readonly ITaskRepository _repository;
+        // ⬇️ Declaración de la dependencia de LaunchDarkly
+        private readonly ILdClient _ldClient;
 
-        public TasksController(ITaskRepository repository)
+        // ⬇️ Constructor con ambas dependencias
+        public TasksController(ITaskRepository repository, ILdClient ldClient)
         {
             _repository = repository;
+            _ldClient = ldClient;
         }
 
         /// <summary>
@@ -20,6 +30,25 @@ namespace Rengifo_Api.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<TodoTask>> GetAll()
         {
+            // Lógica de Feature Flag de LaunchDarkly
+            // Definir el contexto del usuario (puede ser usuario real, o sistema)
+            var context = Context.Builder("system-rengifo-api")
+                .Name("Rengifo API")
+                // .SetKind("user") // Opcional, "user" es el valor por defecto
+                .Build();
+
+            // Evaluar el flag "enable-task-endpoint" (usando un nombre más genérico)
+            bool enabled = _ldClient.BoolVariation("enable-new-task-endpoint", context, false);
+
+            if (!enabled)
+            {
+                return StatusCode(503, new
+                {
+                    message = "El endpoint de tareas está deshabilitado por feature flag (LaunchDarkly)."
+                });
+            }
+            // ⬆️ Fin Lógica de Feature Flag
+
             var tasks = _repository.GetAll();
             return Ok(tasks);
         }
