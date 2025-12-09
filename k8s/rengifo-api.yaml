@@ -4,7 +4,7 @@ metadata:
   name: rengifo-api
   namespace: rengifo
 spec:
-  replicas: 3
+  replicas: 2
   selector:
     matchLabels:
       app: rengifo-api
