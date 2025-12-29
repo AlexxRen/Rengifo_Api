@@ -68,3 +68,21 @@ jobs:
           scanMetadataReportFile: .sonarqube/out/.sonar/report-task.txt
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  dast_zap:
+    runs-on: [self-hosted, Linux, X64, rengifo]
+    needs: [sonarqube]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get Minikube IP
+        run: echo "TARGET_URL=http://$(minikube ip):32000" >> $GITHUB_ENV
+
+      - name: ZAP Baseline Scan
+        uses: zaproxy/action-baseline@v0.14.0
+        with:
+          target: "${{ env.TARGET_URL }}"
+          rules_file_name: ".zap/rules.tsv"
+          cmd_options: "-a"
