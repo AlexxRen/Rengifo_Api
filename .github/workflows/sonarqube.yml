@@ -34,7 +34,14 @@ jobs:
         run: dotnet build --no-restore
 
       - name: Begin SonarQube analysis
-        run: dotnet sonarscanner begin /k:"rengifo_api" /d:sonar.host.url="${{ secrets.SONAR_HOST_URL }}" /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+        run: |
+          dotnet sonarscanner begin \
+            /k:"rengifo_api" \
+            /n:"Rengifo Api" \
+            /v:"1.0" \
+            /d:sonar.host.url="${{ secrets.SONAR_HOST_URL }}" \
+            /d:sonar.login="${{ secrets.SONAR_TOKEN }}" \
+            /d:sonar.exclusions="**/bin/**,**/obj/**,**/node_modules/**,**/*.md"
 
       - name: Build and analyze
         run: dotnet build
