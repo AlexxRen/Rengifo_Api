@@ -22,6 +22,11 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
       - name: Install .NET SDK
         run: |
           wget https://dot.net/v1/dotnet-install.sh -O dotnet-install.sh
