@@ -1,5 +1,8 @@
 name: SonarQube Scan
 
+# Pipeline CI/CD - SAST + DAST Security Analysis
+# Last updated: 2026-01-06
+
 on:
   push:
     branches: [ "master" ]
